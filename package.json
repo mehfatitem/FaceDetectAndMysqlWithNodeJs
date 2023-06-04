@@ -1,0 +1,27 @@
+{
+  "name": "sample-face-detection",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "face-api.js": "^0.22.2",
+    "ffmpeg": "^0.0.4",
+    "livecam": "^0.2.0",
+    "mysql": "^2.18.1",
+    "node-camera": "^1.1.0",
+    "node-media-server": "^2.6.2",
+    "node-rtsp-stream": "^0.0.9",
+    "node-webcam": "^0.8.2",
+    "pi-camera-connect": "^0.3.4",
+    "socket.io": "^4.6.2"
+  }
+}

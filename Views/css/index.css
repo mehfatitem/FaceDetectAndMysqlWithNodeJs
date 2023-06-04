@@ -1,0 +1,41 @@
+#loading{
+   /*position: absolute;*/
+   display: inline;
+   z-index: 1000;
+}
+
+#stream {
+  width: 1000px;
+  border: 1px solid black;
+  overflow: hidden; /* will contain if #first is longer than #second */
+}
+
+#video , #canvas {
+  border : solid 1px green;
+}
+
+#webcam-stream {
+  float:left;
+  width: 500px;
+  border: 1px solid red;
+}
+
+#capture-image {
+  border: 1px solid red;
+  overflow: hidden; /* if you don't want #second to wrap below #first */
+}
+
+#loading-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 3%;
+}
+.warning-text {
+  font-weight: bold;
+  bold;color:red;
+}
+.make_darkness{
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
