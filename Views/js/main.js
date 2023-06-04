@@ -37,11 +37,13 @@
   }
 
 
+
+
     $('#detect-face').click(() => {
       $('#result').html('');
       $(document.body).addClass('make_darkness');
       $("#loading").css("display" , "inline");
-      $("#process").text("Lütfen Bekleyiniz!")
+      $("#process").text("Please Wait!")
       $.ajax({
               url: '/deleteImages',
               type: 'GET',
@@ -57,8 +59,13 @@
                                   if(data.length == 0)
                                       alert("Undetected Face...");
                                   $('#result').html(`<p>Detected Face</p><img src='${data}' style="border:solid 1px green;"></img>`);
+                              },  error: function(xhr, status, error) {
+                                  // Handle error
                                   clear();
+                                  alert('An error occurred: ' + xhr.responseText);
                               }
+                          }).done((data) => {
+                            clear();
                           });
                       } , 1000);
               }
@@ -70,15 +77,26 @@
       $(document.body).addClass('make_darkness');
       $("#loading").css("display" , "inline");
       $("#process").text("Please Wait!")
-      $.ajax({
-              url: '/getDetectedData',
-              type: 'GET',
-              success: (data) => {
-                $('#result').html(data);
-                let table = new DataTable('#face-detect-table', {
-                    responsive: true
-                });
-                clear();
-              }
-      });
+        $.ajax({
+          url: '/getDetectedData',
+          type: 'GET',
+          success: (data) => {
+            $('#result').html(data);
+            let table = new DataTable('#face-detect-table', {
+              responsive: true,
+              columnDefs: [
+                { targets: 'id', orderable: true } // Enable sorting for the "id" column
+              ],
+              order: [[0, 'desc']] 
+            });
+            clear();
+          },
+          error: function(xhr, status, error) {
+            // Handle error
+            clear();
+            alert('An error occurred: ' + xhr.responseText);
+          }
+        }).done(function(data) {
+          clear();
+        });
     });

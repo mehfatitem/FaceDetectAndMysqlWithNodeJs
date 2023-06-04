@@ -51,7 +51,7 @@ app.get('/', (req, res) => {
 
 app.get('/getDetectedData' , (req , res) => {
  let content = "";
- mysqlDb.runQuery('Select * from detectoperation order by id desc', (err, results) => {
+ mysqlDb.runQuery('Select * from detectoperation order by id asc', (err, results) => {
    if (err) {
      console.error('Error executing query:', err);
      res.status(500).send('Error occurred selecting detected face');
@@ -79,16 +79,16 @@ app.get('/detectFace', async (req, res) => {
       let detectedImage = detections;
       res.send(detections);
 
-        const currentUnixTime = Math.floor(Date.now() / 1000);
-
-        mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('${baseImage}' , '${detectedImage}' , ${currentUnixTime} )`, (err, results) => {
+      const currentUnixTime = Math.floor(Date.now() / 1000);
+ 
+      mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('${baseImage}' , '${detectedImage}' , ${currentUnixTime} )`, (err, results) => {
           if (err) {
             console.error('Error executing query:', err);
             res.status(500).send('Error occurred inserting detected face');
             return;
           }
           console.log('Resim kaydı başarılı.');
-        });
+       });
     })
     .catch(error => {
       console.error('Error:', error);

@@ -63,7 +63,7 @@ class MyUtils {
   }
 
   static createHTMLTable(data) {
-    let html = '<table id="face-detect-table" class="table table-striped table-bordered" style="width:90%;">';
+    let html = `<table id="face-detect-table" class="table table-striped table-bordered" cellspacing="0" style="width:90%;">`;
     html += '<thead><tr>';
 
     for (let key in data[0]) {
