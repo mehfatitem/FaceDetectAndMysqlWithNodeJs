@@ -56,9 +56,19 @@
                               type: 'GET',
                               data: {imgFilePath : downloadedImagePath},
                               success: (data) => {
-                                  if(data.length == 0)
+                                  if(data.length == 0){
                                       alert("Undetected Face...");
-                                  $('#result').html(`<p>Detected Face</p><img src='${data}' style="border:solid 1px green;"></img>`);
+                                      clear();
+                                      return;
+                                  }
+                  
+                                    for(var i=0;i<data.length;i++) {
+                                      $('#result').append(`<p>Detected Face ${i+1}</p><img src='${data[i]}' style="border:solid 1px green;"></img>`);
+                                    }
+
+                                    console.dir(data);
+                                  
+                                  
                               },  error: function(xhr, status, error) {
                                   // Handle error
                                   clear();

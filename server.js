@@ -79,9 +79,9 @@ app.get('/detectFace', async (req, res) => {
       let detectedImage = detections;
       res.send(detections);
 
-      const currentUnixTime = Math.floor(Date.now() / 1000);
- 
-      mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('${baseImage}' , '${detectedImage}' , ${currentUnixTime} )`, (err, results) => {
+      for(var i=0;i<detections.length;i++) {
+        const currentUnixTime = Math.floor(Date.now() / 1000);
+        mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('${baseImage}' , '${detections[i]}' , ${currentUnixTime} )`, (err, results) => {
           if (err) {
             console.error('Error executing query:', err);
             res.status(500).send('Error occurred inserting detected face');
@@ -89,11 +89,57 @@ app.get('/detectFace', async (req, res) => {
           }
           console.log('Resim kaydı başarılı.');
        });
+      }
     })
     .catch(error => {
       console.error('Error:', error);
       res.status(500).send('Error occurred during face detection');
     });
+});
+
+app.get('/matchFace', async (req, res) => {
+    const imgPath = req.query.imgFilePath;
+    faceRecognition.loadModel()
+    .then(() => {
+      // Detect faces in the specified image
+      return faceRecognition.detectFaces(imgPath);
+    })
+    .then(detections => {
+      const faceDescriptors = [
+        {
+          label: 'Person 1',
+          descriptor: new Float32Array(/* Face descriptor for Person 1 */)
+        },
+        {
+          label: 'Person 2',
+          descriptor: new Float32Array(/* Face descriptor for Person 2 */)
+        },
+        // Add more face descriptors as needed
+      ];
+      faceRecognition.createFaceMatcher(faceDescriptors).
+      then(data => {
+          faceRecognition.matchFaces(imgPath).
+          then( matches => {
+            // Process the matches as needed
+            matches.forEach(match => {
+              const { detection, match: bestMatch } = match;
+              console.log('Face detected:', detection);
+              console.log('Best match:', bestMatch);
+            });
+          }).
+          catch(error => {
+            console.error('Error occurred during match faces', error);
+          })
+      }).
+      catch(error =>  {
+          console.error('Error occurred during create matcher', error);
+      });
+    })
+    .catch(error => {
+      console.error('Error occurred during face detection', error);
+    });
+
+
 });
 
 // Start the server
