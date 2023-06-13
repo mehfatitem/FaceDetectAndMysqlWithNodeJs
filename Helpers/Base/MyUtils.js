@@ -50,6 +50,11 @@ class MyUtils {
     return year.toString();
   }
 
+  static isBase64String(str) {
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    return base64Regex.test(str);
+  }
+
   static convertDateToName(day, month, year) {
     const monthName = MyUtils.convertMonthNumberToName(month);
     const dayName = MyUtils.convertDayNumberToName(day);
@@ -78,9 +83,12 @@ class MyUtils {
 
       for (let key in data[i]) {
         if (typeof data[i][key] === 'string') {
-          if (data[i][key].startsWith('data:image')) {
+          /*if (MyUtils.isBase64String(data[i][key])) {
+            html += '<td align="center" style="vertical-align: middle !important;"><img src="data:image/png;base64,' + data[i][key] + '"></td>';
+          } else*/ if(data[i][key].startsWith("data:image/png")) {
             html += '<td align="center" style="vertical-align: middle !important;"><img src="' + data[i][key] + '"></td>';
-          } else {
+          }
+          else {
             html += '<td>' + data[i][key] + '</td>';
           }
         } else if (MyUtils.isUnixTimestamp(data[i][key])) {

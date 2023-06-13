@@ -91,6 +91,10 @@
           url: '/getDetectedData',
           type: 'GET',
           success: (data) => {
+            if(data === "No result data") {
+              alert(data);
+              return;
+            }
             $('#result').html(data);
             let table = new DataTable('#face-detect-table', {
               responsive: true,

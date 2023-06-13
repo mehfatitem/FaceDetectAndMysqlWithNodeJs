@@ -3,12 +3,16 @@ const canvas = require('canvas');
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
+/*const tf = require("@tensorflow/tfjs-node");
+const cocoSsd = require("@tensorflow-models/coco-ssd");*/
+
 const fs = require('fs');
 const path = require('path');
 
 class FaceRecognition {
   constructor() {
     this.faceMatcher = null;
+    //tf.enableProdMode();
   }
 
   async loadModel() {
@@ -69,6 +73,30 @@ class FaceRecognition {
     }));
 
     return matches;
+  }
+
+
+  async  createDescription(imagePath) {
+    await faceapi.nets.ssdMobilenetv1.loadFromDisk('models');
+    await faceapi.nets.faceLandmark68Net.loadFromDisk('models');
+    await faceapi.nets.faceRecognitionNet.loadFromDisk('models');
+
+    // Load input image
+    const image = await canvas.loadImage(imagePath);
+
+    // Detect faces in the image
+    const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors();
+
+    // Iterate through each detected face
+    detections.forEach(detection => {
+      // Access the face descriptor
+      //console.dir(detection['descriptor']);
+
+    });
+
+    console.dir(detections);
+
+    return detections;
   }
 }
 
