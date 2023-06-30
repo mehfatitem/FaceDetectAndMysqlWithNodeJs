@@ -67,8 +67,8 @@ class MyUtils {
     return !isNaN(timestamp) && timestamp >= 0 && new Date(timestamp * 1000).getTime() > 0 && value.toString().length >= 10;
   }
 
-  static createHTMLTable(data) {
-    let html = `<table id="face-detect-table" class="table table-striped table-bordered" cellspacing="0" style="width:90%;">`;
+  static createHTMLTable(data , id) {
+    let html = `<table id="${id}" class="table table-striped table-bordered" cellspacing="0" style="width:90%;">`;
     html += '<thead><tr>';
 
     for (let key in data[0]) {

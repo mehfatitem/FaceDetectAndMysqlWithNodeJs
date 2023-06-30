@@ -3,11 +3,12 @@ const canvas = require('canvas');
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
-/*const tf = require("@tensorflow/tfjs-node");
-const cocoSsd = require("@tensorflow-models/coco-ssd");*/
-
 const fs = require('fs');
 const path = require('path');
+
+const FileHandler = require('./FileHandler.js');
+
+const fileHandler = new FileHandler();
 
 class FaceRecognition {
   constructor() {
@@ -21,7 +22,20 @@ class FaceRecognition {
     await faceapi.nets.faceRecognitionNet.loadFromDisk('models');
   }
 
+  async isDetectFace(imagePath) {
+    await this.loadModel();
+
+    const img = await canvas.loadImage(imagePath);
+
+    const detections = await faceapi.detectAllFaces(img)
+      .withFaceLandmarks()
+      .withFaceDescriptors()
+
+    return detections.length > 0;
+  }
+  
   async detectFaces(imagePath) {
+    await this.loadModel();
     const img = await canvas.loadImage(imagePath);
   
     // Detect faces in the image
@@ -56,47 +70,131 @@ class FaceRecognition {
     return croppedFaces;
   }
 
-  async createFaceMatcher(faceDescriptors) {
-    const labeledDescriptors = faceDescriptors.map(fd => new faceapi.LabeledFaceDescriptors(fd.label, [fd.descriptor]));
-    this.faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
-  }
+  async generateFaceDescriptor(imagePath) {
+    await this.loadModel();
 
-  async matchFaces(imagePath) {
-    if (!this.faceMatcher) {
-      throw new Error('Face matcher not initialized. Call createFaceMatcher() first.');
-    }
-
-    const detections = await this.detectFaces(imagePath);
-    const matches = detections.map(detection => ({
-      detection,
-      match: this.faceMatcher.findBestMatch(detection.descriptor)
-    }));
-
-    return matches;
-  }
-
-
-  async  createDescription(imagePath) {
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk('models');
-    await faceapi.nets.faceLandmark68Net.loadFromDisk('models');
-    await faceapi.nets.faceRecognitionNet.loadFromDisk('models');
-
-    // Load input image
-    const image = await canvas.loadImage(imagePath);
+    const img = await canvas.loadImage(imagePath);
 
     // Detect faces in the image
-    const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors();
+    const detections = await faceapi.detectAllFaces(img)
+      .withFaceLandmarks()
+      .withFaceDescriptors();
 
-    // Iterate through each detected face
-    detections.forEach(detection => {
-      // Access the face descriptor
-      //console.dir(detection['descriptor']);
+    const faceDescriptors = detections.map(detection => ({
+      descriptor: detection.descriptor,
+      label: 'Label for the detected face' // Provide a label for the face descriptor
+    }));
 
-    });
+    return faceDescriptors;
+  }
 
-    console.dir(detections);
 
-    return detections;
+async  findMatchingDescription(imagePath, folderPath) {
+  const faceDescriptors = await this.generateFaceDescriptor(imagePath);
+
+  if(faceDescriptors.length == 0)
+    return [{
+        matched: false,
+        matchedImgpath : null,
+        contact: null,
+        similarityScore: null,
+        message: `The faces are not match.`
+      }];
+
+  const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
+
+  const fileNames = fs.readdirSync(folderPath);
+
+  let paths = 'C:/Users/mehfatitem/Downloads/yuzler';
+
+  let result = [];
+
+  for (const fileName of fileNames) {
+    const filePath = path.join(folderPath, fileName);
+    const description = fs.readFileSync(filePath, 'utf8');
+
+    const desc = Object.values(JSON.parse(description));
+
+    const distance = faceapi.euclideanDistance(faceDescriptors[0].descriptor, desc);
+    const similarityScore = 1 - distance; // Calculate the similarity score
+
+    if (similarityScore > distanceThreshold) {
+      const similarityPercentage = Math.round(similarityScore * 100);
+      const matchedImgpath = `data:image/png;base64,${fileHandler.imageToBase64(path.join(paths, fileName.replace('.txt', '.png')))}`
+      result.push({
+        matched: true,
+        matchedImgpath : matchedImgpath,
+        contact: fileName.replace('.txt', ''),
+        similarityScore: similarityPercentage,
+        message: `The faces are a match. Similarity Score: ${similarityPercentage}%`
+      });
+    } else {
+      result.push({
+        matched: false,
+        matchedImgpath : null,
+        contact: null,
+        similarityScore: null,
+        message: `The faces are not match.`
+      });
+    }
+  }
+
+  return result;
+}
+
+  async compareImages(imagePath1, imagePath2) {
+    const faceDescriptors1 = await this.generateFaceDescriptor(imagePath1);
+    const faceDescriptors2 = await this.generateFaceDescriptor(imagePath2);
+
+    const distanceThreshold = 0.6; // Define a threshold value to determine if the faces are a match
+
+    let contact = path.parse(imagePath2).name; // Move the contact variable outside the loop
+
+    // Compare each face descriptor from imagePath1 with each face descriptor from imagePath2
+    for (const faceDescriptor1 of faceDescriptors1) {
+      for (const faceDescriptor2 of faceDescriptors2) {
+        const distance = faceapi.euclideanDistance(faceDescriptor1.descriptor, faceDescriptor2.descriptor);
+        const similarityScore = 1 - distance; // Calculate the similarity score
+
+        if (similarityScore > distanceThreshold) {
+          const similarityPercentage = Math.round(similarityScore * 100);
+          return {
+            matched : true,
+            matchedImgpath : `data:image/png;base64,${fileHandler.imageToBase64(imagePath2)}`,
+            contact: contact,
+            similarityScore: similarityPercentage,
+            message: `${imagePath2} The faces are a match. Similarity Score: ${similarityPercentage}%`
+          };
+        } else {
+          return {
+            matched : false,
+            matchedImgpath : null,
+            contact: null,
+            similarityScore: null,
+            message: null
+          };
+        }
+      }
+    }
+  }
+
+  async processImagesInFolder(folderPath, outputFolder) {
+    await this.loadModel();
+
+    const fileNames = fs.readdirSync(folderPath);
+
+    for (const fileName of fileNames) {
+      const imagePath = path.join(folderPath, fileName);
+      const faceDescriptors = await this.generateFaceDescriptor(imagePath);
+
+      for (const faceDescriptor of faceDescriptors) {
+        const faceLabel = faceDescriptor.label;
+        const faceOutputPath = path.join(outputFolder, `${path.parse(fileName).name}.txt`);
+        const faceDescriptorText = JSON.stringify(faceDescriptor.descriptor);
+
+        fs.writeFileSync(faceOutputPath, faceDescriptorText);
+      }
+    }
   }
 }
 

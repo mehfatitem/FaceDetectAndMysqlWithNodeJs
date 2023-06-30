@@ -1,48 +1,66 @@
-const sql = require('mssql');
+const { Connection, Request } = require('tedious');
 
 const config = {
-  user: '',
+  user: 'MEHFATITEMPC\\mehfatitem',
   password: '',
   server: 'MEHFATITEMPC\\SQLEXPRESS01',
   database: 'facedetect',
+  port: 1433,
   options: {
     trustedConnection: true,
-    trustServerCertificate: false, // Set to false when using the imported certificate
+    trustServerCertificate: true, // Set to false when using the imported certificate
     enableArithAbort: true,
     encrypt: true // Enable encryption
   },
 };
 
-const connectionString = "metadata=res://*/FaceDetectModel.csdl|res://*/FaceDetectModel.ssdl|res://*/FaceDetectModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=MEHFATITEMPC\SQLEXPRESS01;initial catalog=facedetect;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework&quot;"
+const connectionString = "data source=MEHFATITEMPC\\SQLEXPRESS01;initial catalog=facedetect;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;App=EntityFramework";
+
 
 class MSSQL {
-  async connect() {
-    try {
-      await sql.connect(connectionString);
-      console.log('Connected to the MSSQL server');
-    } catch (error) {
-      console.error('Error connecting to the MSSQL server:', error);
-    }
+  constructor() {
+    this.config = config;
+    this.connection = new Connection(config);
   }
 
-  async disconnect() {
-    try {
-      await sql.close();
-      console.log('Disconnected from the MSSQL server');
-    } catch (error) {
-      console.error('Error disconnecting from the MSSQL server:', error);
-    }
+  connect() {
+    return new Promise((resolve, reject) => {
+      this.connection.on('connect', err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+
+      this.connection.on('error', err => {
+        reject(err);
+      });
+
+      this.connection.connect();
+    });
   }
 
-  async executeQuery(query) {
-    try {
-      const result = await sql.query(query);
-      return result.recordset;
-    } catch (error) {
-      console.error('Error executing the query:', error);
-      throw error;
-    }
+  query(sql, params = []) {
+    return new Promise((resolve, reject) => {
+      const request = new Request(sql, (err, rowCount, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+
+      params.forEach(param => {
+        request.addParameter(param.name, param.type, param.value);
+      });
+
+      this.connection.execSql(request);
+    });
+  }
+
+  close() {
+    this.connection.close();
   }
 }
-
 module.exports = MSSQL;

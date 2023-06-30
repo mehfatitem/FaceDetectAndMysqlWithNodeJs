@@ -9,7 +9,7 @@ const FaceRecognition = require('./Helpers/Base/FaceRecognition.js');
 const FileHandler = require('./Helpers/Base/FileHandler.js');
 const MyUtils = require('./Helpers/Base/MyUtils.js');
 const MySqlDb = require('./Helpers/MysqlDb.js');
-const MSSQL = require('./Helpers/MSSQL.js');
+//const MSSQL = require('./Helpers/MSSQL.js');
 const axios = require('axios');
 const faceDetectServiceUrl = "http://localhost:5000/api/operations";
 
@@ -24,7 +24,7 @@ const io = require('socket.io')(server, {
 const faceRecognition = new FaceRecognition();
 const fileHandler = new FileHandler();
 const mysqlDb = new MySqlDb();
-const mssql = new MSSQL();
+//const mssql = new MSSQL();
 
 const port = 3000;
 
@@ -67,7 +67,7 @@ app.get('/getDetectedData' , (req , res) => {
       res.send("No result data");
       return;
    }
-   content = MyUtils.createHTMLTable(results);
+   content = MyUtils.createHTMLTable(results , "face-detect-table");
    res.send(content);
  });
 });
@@ -76,11 +76,7 @@ app.get('/detectFace', async (req, res) => {
   const imgPath = req.query.imgFilePath;
 
   // Load the face recognition model
-  faceRecognition.loadModel()
-    .then(() => {
-      // Detect faces in the specified image
-      return faceRecognition.detectFaces(imgPath);
-    })
+  faceRecognition.detectFaces(imgPath)
     .then(detections => {
       let baseImage = fileHandler.imageToBase64(imgPath);
       baseImage = `${baseImage}`;
@@ -99,6 +95,59 @@ app.get('/detectFace', async (req, res) => {
     });
 });
 
+app.get('/isDetectFace', async (req, res) => {
+  const imgPath = req.query.imgFilePath;
+
+  // Load the face recognition model
+  faceRecognition.isDetectFace(imgPath).then(result => {
+    return res.send(result);
+  })
+});
+
+app.get('/matchFace', async (req, res) => {
+  const imgPath = req.query.imgFilePath;
+  const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler';
+  let result = [];
+  const imageFiles = fs.readdirSync(folderPath);
+
+  for (const imageFile of imageFiles) {
+    const imageFilePath = path.join(folderPath, imageFile);
+    console.dir(imageFilePath);
+    const similarityResult = await faceRecognition.compareImages(imgPath, imageFilePath);
+    result.push(similarityResult);
+  }
+
+  result = result.filter(item => item.matched);
+
+  if(result.length === 0) {
+      content = "No result data";
+  } else {
+
+    content = MyUtils.createHTMLTable(result, "matched-face-table");
+  }
+
+  res.send(content);
+});
+
+app.get('/matchFaceDesc', async (req, res) => {
+  const imgPath = req.query.imgFilePath;
+  const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler_description';
+  const result = await faceRecognition.findMatchingDescription(imgPath , folderPath);
+
+  let resultNew = result.filter(item => item.matched);
+
+  if(resultNew.length === 0) {
+      content = "No result data";
+  } else {
+
+    content = MyUtils.createHTMLTable(resultNew, "matched-face-table");
+  }
+
+  res.send(content);
+
+});
+
+/* functions */
 function createOperationForMysql(baseImage , detectedImage , operationTime) {
   mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('data:image/png;base64,${baseImage}' , '${detectedImage}' , ${operationTime} )`, (err, results) => {
     if (err) {
@@ -112,6 +161,7 @@ function createOperationForMysql(baseImage , detectedImage , operationTime) {
 }
 
 async function createOperationForMssql(baseImage , detectedImage , operationTime) {
+
   try {
     const operation = {
       baseImage : baseImage ,
@@ -134,53 +184,25 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
     console.error('Error:', error.message);
   }
 }
+/* functions */
 
-app.get('/matchFace', async (req, res) => {
-    const imgPath = req.query.imgFilePath;
-    let faceDescriptors = null;
-    faceRecognition.loadModel()
+/*const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler/';
+const outputFilePath = 'C:/Users/mehfatitem/Downloads/yuzler_description/';
+
+faceRecognition.processImagesInFolder(folderPath, outputFilePath)
     .then(() => {
       // Detect faces in the specified image
-      return faceRecognition.detectFaces(imgPath);
-    })
-    .then(detections => {
-      faceRecognition.createDescription('C:/Users/mehfatitem/Downloads/tmpImage2.png').then(data => {
-           faceDescriptors = [
-            {
-              label: 'Mehmed Fatih Temiz',
-              descriptor: data[0]['descriptor']
-            },
-          ];
-           faceRecognition.createFaceMatcher(faceDescriptors).
-            then(data => {
-                faceRecognition.matchFaces(imgPath).
-                then( matches => {
-                  console.dir(matches);
-                  // Process the matches as needed
-                  matches.forEach(match => {
-                    const { detection, match: bestMatch } = match;
-                    console.log('Face detected:', detection);
-                    console.log('Best match:', bestMatch);
-                  });
-                }).
-                catch(error => {
-                  console.error('Error occurred during match faces', error);
-                })
-            }).
-            catch(error =>  {
-                console.error('Error occurred during create matcher', error);
-            });
-      }).catch(error => {
+})
+.catch(error => {
+	console.log('Error:', error);
+	res.status(500).send('Error occurred during face detection');
+});*/
 
-      });
-    })
-    .catch(error => {
-      console.error('Error occurred during face detection', error);
-    });
-});
 
-// Start the server
+
+/* Start the server*/
 server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+/* Start the server*/
 
