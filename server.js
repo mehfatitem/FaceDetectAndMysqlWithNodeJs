@@ -132,7 +132,7 @@ app.get('/matchFace', async (req, res) => {
 app.get('/matchFaceDesc', async (req, res) => {
   const imgPath = req.query.imgFilePath;
   const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler_description';
-  const result = await faceRecognition.findMatchingDescription(imgPath , folderPath);
+  const result = await faceRecognition.findMatchingDescriptionDb(imgPath);
 
   let resultNew = result.filter(item => item.matched);
 
@@ -186,10 +186,10 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
 }
 /* functions */
 
-/*const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler/';
+const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler/';
 const outputFilePath = 'C:/Users/mehfatitem/Downloads/yuzler_description/';
 
-faceRecognition.processImagesInFolder(folderPath, outputFilePath)
+/*faceRecognition.processImagesInFolderToDB(folderPath, outputFilePath)
     .then(() => {
       // Detect faces in the specified image
 })
@@ -197,7 +197,6 @@ faceRecognition.processImagesInFolder(folderPath, outputFilePath)
 	console.log('Error:', error);
 	res.status(500).send('Error occurred during face detection');
 });*/
-
 
 
 /* Start the server*/
