@@ -12,7 +12,7 @@ const MySqlDb = require('./Helpers/MysqlDb.js');
 
 const axios = require('axios');
 const faceDetectServiceUrl = "http://localhost:5000/api/operations";
-const username = '940144';
+const username = 'mehfatitem';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -150,7 +150,8 @@ app.get('/matchFaceDesc', async (req, res) => {
 
 /* functions */
 function createOperationForMysql(baseImage , detectedImage , operationTime) {
-  mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('data:image/png;base64,${baseImage}' , '${detectedImage}' , ${operationTime} )`, (err, results) => {
+  let tmpBaseImage = `data:image/png;base64,${baseImage}`;
+  mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values(?,?,?)`, [tmpBaseImage , detectedImage , operationTime], (err, results) => {
     if (err) {
       console.log('Error executing query:', err);
       res.status(500).send('Error occurred inserting detected face');
@@ -185,19 +186,37 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
     console.error('Error:', error.message);
   }
 }
+
+function modelImagesDb() {
+  const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
+
+  faceRecognition.processImagesInFolderToDB(faceFolderPath)
+      .then(() => {
+        // Detect faces in the specified image
+  })
+  .catch(error => {
+    console.log('Error:', error);
+  });
+}
+
+function modelImagesFolder() {
+  const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
+  const descFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
+
+  faceRecognition.processImagesInFolder(faceFolderPath , descFilePath)
+      .then(() => {
+        // Detect faces in the specified image
+  })
+  .catch(error => {
+    console.log('Error:', error);
+  });
+}
+
 /* functions */
 
-const folderPath = `C:/Users/${username}/Downloads/yuzler/`;
-const outputFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
 
-/*faceRecognition.processImagesInFolderToDB(folderPath)
-    .then(() => {
-      // Detect faces in the specified image
-})
-.catch(error => {
-	console.log('Error:', error);
-});*/
-
+//modelImagesDb();
+//modelImagesFolder();
 
 /* Start the server*/
 server.listen(port, () => {

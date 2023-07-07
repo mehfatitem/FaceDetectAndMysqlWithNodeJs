@@ -3,7 +3,7 @@
   let click_button = document.querySelector("#click-photo");
   let canvas = document.querySelector("#canvas");
   const tmpImage = 'tmpImage.png';
-  const username = '940144';
+  const username = 'mehfatitem';
   const downloadedImagePath = `C:/Users/${username}/Downloads/${tmpImage}`;
 
   $(document).ready(() => {

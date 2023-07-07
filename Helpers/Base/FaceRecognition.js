@@ -1,6 +1,10 @@
 const faceapi = require('face-api.js');
 const canvas = require('canvas');
-const username = '940144';
+
+const username = 'mehfatitem';
+const faceFolderPath = `C:/Users/${username}/Downloads/yuzler`;
+const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
+
 const {
   Canvas,
   Image,
@@ -11,6 +15,7 @@ faceapi.env.monkeyPatch({
   Image,
   ImageData
 });
+
 const MySqlDb = require('./../MysqlDb.js');
 
 const fs = require('fs');
@@ -114,9 +119,6 @@ class FaceRecognition {
       }];
     }
 
-    const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
-
-    const folderPath = `C:/Users/${username}/Downloads/yuzler`; // Provide the folder path where the face images are stored
     const result = [];
 
     await new Promise((resolve, reject) => {
@@ -128,7 +130,7 @@ class FaceRecognition {
           for (const item in results) {
             const description = results[item]['description'];
             const contact = results[item]['contact'];
-            const imgPath = path.join(folderPath, `${contact}.png`);
+            const imgPath = path.join(faceFolderPath, `${contact}.png`);
 
             const desc = Object.values(JSON.parse(description));
 
@@ -177,11 +179,9 @@ class FaceRecognition {
         message: `The faces are not match.`
       }];
 
-    const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
-
     const fileNames = fs.readdirSync(folderPath);
 
-    let paths = `C:/Users/${username}/Downloads/yuzler`;
+
 
     let result = [];
 
@@ -196,7 +196,7 @@ class FaceRecognition {
 
       if (similarityScore > distanceThreshold) {
         const similarityPercentage = Math.round(similarityScore * 100);
-        const matchedImgpath = `data:image/png;base64,${fileHandler.imageToBase64(path.join(paths, fileName.replace('.txt', '.png')))}`
+        const matchedImgpath = `data:image/png;base64,${fileHandler.imageToBase64(path.join(faceFolderPath, fileName.replace('.txt', '.png')))}`
         result.push({
           matched: true,
           matchedImgpath: matchedImgpath,
