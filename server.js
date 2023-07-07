@@ -13,6 +13,9 @@ const MySqlDb = require('./Helpers/MysqlDb.js');
 const axios = require('axios');
 const faceDetectServiceUrl = "http://localhost:5000/api/operations";
 const username = 'mehfatitem';
+  
+const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
+const descFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -188,8 +191,6 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
 }
 
 function modelImagesDb() {
-  const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
-
   faceRecognition.processImagesInFolderToDB(faceFolderPath)
       .then(() => {
         // Detect faces in the specified image
@@ -200,9 +201,6 @@ function modelImagesDb() {
 }
 
 function modelImagesFolder() {
-  const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
-  const descFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
-
   faceRecognition.processImagesInFolder(faceFolderPath , descFilePath)
       .then(() => {
         // Detect faces in the specified image
