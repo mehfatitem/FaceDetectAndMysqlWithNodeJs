@@ -9,7 +9,7 @@ const FaceRecognition = require('./Helpers/Base/FaceRecognition.js');
 const FileHandler = require('./Helpers/Base/FileHandler.js');
 const MyUtils = require('./Helpers/Base/MyUtils.js');
 const MySqlDb = require('./Helpers/MysqlDb.js');
-//const MSSQL = require('./Helpers/MSSQL.js');
+
 const axios = require('axios');
 const faceDetectServiceUrl = "http://localhost:5000/api/operations";
 const username = '940144';
