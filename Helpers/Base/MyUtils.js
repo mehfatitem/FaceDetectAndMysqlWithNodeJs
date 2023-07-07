@@ -39,7 +39,7 @@ class MyUtils {
   }
 
   static convertMonthNumberToName(month) {
-  return MyUtils.months[month - 1] || "";
+  return MyUtils.monthsTr[month - 1] || "";
   }
 
   static convertDayNumberToName(day) {
@@ -83,10 +83,8 @@ class MyUtils {
 
       for (let key in data[i]) {
         if (typeof data[i][key] === 'string') {
-          /*if (MyUtils.isBase64String(data[i][key])) {
-            html += '<td align="center" style="vertical-align: middle !important;"><img src="data:image/png;base64,' + data[i][key] + '"></td>';
-          } else*/ if(data[i][key].startsWith("data:image/png")) {
-            html += '<td align="center" style="vertical-align: middle !important;"><img src="' + data[i][key] + '"></td>';
+          if(data[i][key].startsWith("data:image/png")) {
+            html += '<td align="center" style="vertical-align: middle !important;"><img src="' + data[i][key] + '" width=320 height=240></td>';
           }
           else {
             html += '<td>' + data[i][key] + '</td>';

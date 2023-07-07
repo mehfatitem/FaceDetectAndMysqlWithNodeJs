@@ -1,5 +1,6 @@
 const faceapi = require('face-api.js');
 const canvas = require('canvas');
+const username = '940144';
 const {
   Canvas,
   Image,
@@ -90,9 +91,11 @@ class FaceRecognition {
       .withFaceLandmarks()
       .withFaceDescriptors();
 
+    const fileName = path.basename(imagePath, path.extname(imagePath));
+
     const faceDescriptors = detections.map(detection => ({
       descriptor: detection.descriptor,
-      label: 'Label for the detected face' // Provide a label for the face descriptor
+      label: fileName // Provide a label for the face descriptor
     }));
 
     return faceDescriptors;
@@ -113,11 +116,11 @@ class FaceRecognition {
 
     const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
 
-    const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler'; // Provide the folder path where the face images are stored
+    const folderPath = `C:/Users/${username}/Downloads/yuzler`; // Provide the folder path where the face images are stored
     const result = [];
 
     await new Promise((resolve, reject) => {
-      mysqlDb.runQuery(`SELECT * FROM facedescriptions ORDER BY id`, async (err, results) => {
+      mysqlDb.runQuery(`SELECT * FROM facedescriptions ORDER BY id`, [], async (err, results) => {
         if (err) {
           console.log('Error executing query:', err);
           reject(err);
@@ -178,7 +181,7 @@ class FaceRecognition {
 
     const fileNames = fs.readdirSync(folderPath);
 
-    let paths = 'C:/Users/mehfatitem/Downloads/yuzler';
+    let paths = `C:/Users/${username}/Downloads/yuzler`;
 
     let result = [];
 
@@ -285,7 +288,7 @@ class FaceRecognition {
 
         const currentUnixTime = Math.floor(new Date().getTime() / 1000);
 
-        mysqlDb.runQuery(`Insert into facedescriptions (description, contact, operationtime) values('${faceDescriptorText}' , '${contact}' , ${currentUnixTime} )`, (err, results) => {
+        mysqlDb.runQuery(`Insert into facedescriptions (description, contact, operationtime) values(? , ? , ? )`, [faceDescriptorText , contact , currentUnixTime] ,  (err, results) => {
           if (err) {
             console.log('Error executing query:', err);
             res.status(500).send('Error occurred inserting detected face');

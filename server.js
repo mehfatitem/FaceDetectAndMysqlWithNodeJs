@@ -12,6 +12,7 @@ const MySqlDb = require('./Helpers/MysqlDb.js');
 //const MSSQL = require('./Helpers/MSSQL.js');
 const axios = require('axios');
 const faceDetectServiceUrl = "http://localhost:5000/api/operations";
+const username = '940144';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -186,16 +187,15 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
 }
 /* functions */
 
-const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler/';
-const outputFilePath = 'C:/Users/mehfatitem/Downloads/yuzler_description/';
+const folderPath = `C:/Users/${username}/Downloads/yuzler/`;
+const outputFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
 
-/*faceRecognition.processImagesInFolderToDB(folderPath, outputFilePath)
+/*faceRecognition.processImagesInFolderToDB(folderPath)
     .then(() => {
       // Detect faces in the specified image
 })
 .catch(error => {
 	console.log('Error:', error);
-	res.status(500).send('Error occurred during face detection');
 });*/
 
 

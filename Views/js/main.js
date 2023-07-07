@@ -3,7 +3,8 @@
   let click_button = document.querySelector("#click-photo");
   let canvas = document.querySelector("#canvas");
   const tmpImage = 'tmpImage.png';
-  const downloadedImagePath = `C:/Users/mehfatitem/Downloads/${tmpImage}`;
+  const username = '940144';
+  const downloadedImagePath = `C:/Users/${username}/Downloads/${tmpImage}`;
 
   $(document).ready(() => {
     $('#start-camera').trigger('click');
@@ -44,7 +45,7 @@
 
   $('#detect-face').click(() => {
     var startTime = new Date();
-    $('#result').html('');
+    $('#result').html(``);
     $(document.body).addClass('make_darkness');
     $("#loading").css("display", "inline");
     $("#process").text("Please Wait!")
@@ -96,7 +97,19 @@
   });
 
   $('#get-detect-face').click(() => {
-    $('#result').html('');
+    $('#result').html(`<div class="dataTables_length" id="data-count" style="float:left;">
+        <label>Show 
+            <select id="entriesPerPage">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+                <option value="-1">Hepsi</option>
+            </select>
+            entries
+        </label>
+      </div>`);
     $(document.body).addClass('make_darkness');
     $("#loading").css("display", "inline");
     $("#process").text("Please Wait!");
@@ -109,9 +122,10 @@
           alert(data);
           return;
         }
-        $('#result').html(data);
+        $('#result').append(data);
         let table = new DataTable('#face-detect-table', {
-          responsive: true,
+          legthMenu: [10, 25, 50, 75, 100], // Specify the available options for the "Show entries" dropdown
+          pageLength: 10, // Set the default number of entries to display,          
           dom: 'Bfrtip',
           buttons: [
             'copy', 'csv', 'excel', 'pdf', 'print'
@@ -125,6 +139,10 @@
           order: [
             [0, 'desc']
           ]
+        });
+        $('#data-count').css('display' , 'inline');
+        $('#entriesPerPage').on('change', function() {
+          table.page.len($(this).val()).draw();
         });
         clear();
       },
@@ -140,7 +158,19 @@
 
   $('#search-face').click(() => {
     var startTime = new Date();
-    $('#result').html('');
+    $('#result').html(`<div class="dataTables_length" id="data-count" style="float:left;">
+        <label>Show 
+            <select id="entriesPerPage">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+                <option value="-1">Hepsi</option>
+            </select>
+            entries
+        </label>
+      </div>`);
     $(document.body).addClass('make_darkness');
     $("#loading").css("display", "inline");
     $("#process").text("Please Wait!")
@@ -153,18 +183,6 @@
       success: (data) => {
         download();
         setTimeout(() => {
-          /*$.ajax({
-            url: '/isDetectFace',
-            type: 'GET',
-            data: {
-              imgFilePath: downloadedImagePath
-            },
-            success: (data) => {
-              if (!data) {
-                alert("Undetected Face...");
-                clear();
-                return;
-              }*/
               $.ajax({
                 url: '/matchFaceDesc',
                 type: 'GET',
@@ -180,15 +198,20 @@
                     alert(data);
                     return;
                   } else {
-                    $('#result').html(data);
+                    $('#result').append(data);
                     let table = new DataTable('#matched-face-table', {
-                      responsive: true,
+                      "lengthMenu": [10, 25, 50, 75, 100], // Specify the available options for the "Show entries" dropdown
+                      "pageLength": 10,// Set the default number of entries to display,
                       dom: 'Bfrtip',
                       buttons: [
                         'copy', 'csv', 'excel', 'pdf', 'print'
                       ],
                     });
                   }
+                  $('#data-count').css('display' , 'inline');
+                  $('#entriesPerPage').on('change', function() {
+                    table.page.len($(this).val()).draw();
+                  });
                   clear();
                 },
                 error: function(xhr, status, error) {
@@ -199,15 +222,6 @@
               }).done(function(data) {
                 clear();
               });
-            /*},
-            error: function(xhr, status, error) {
-              // Handle error
-              clear();
-              alert('An error occurred: ' + xhr.responseText);
-            }
-          });.done((data) => {
-
-          });*/
         }, 1000);
       }
     });
