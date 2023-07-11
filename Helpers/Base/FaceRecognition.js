@@ -36,6 +36,7 @@ class FaceRecognition {
     await faceapi.nets.ssdMobilenetv1.loadFromDisk('models');
     await faceapi.nets.faceLandmark68Net.loadFromDisk('models');
     await faceapi.nets.faceRecognitionNet.loadFromDisk('models');
+    await faceapi.nets.tinyFaceDetector.loadFromDisk('models');
   }
 
   async isDetectFace(imagePath) {
@@ -55,9 +56,9 @@ class FaceRecognition {
     const img = await canvas.loadImage(imagePath);
 
     // Detect faces in the image
-    const detections = await faceapi.detectAllFaces(img)
+    const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
-      .withFaceDescriptors()
+      .withFaceDescriptors();
 
     const croppedFaces = [];
 
@@ -92,7 +93,7 @@ class FaceRecognition {
     const img = await canvas.loadImage(imagePath);
 
     // Detect faces in the image
-    const detections = await faceapi.detectAllFaces(img)
+    const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
       .withFaceDescriptors();
 
