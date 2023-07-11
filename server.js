@@ -1,3 +1,4 @@
+const c = require('./Consts/const.js');
 const express = require('express');
 const http = require('http');
 const fs = require('fs');
@@ -9,13 +10,7 @@ const FaceRecognition = require('./Helpers/Base/FaceRecognition.js');
 const FileHandler = require('./Helpers/Base/FileHandler.js');
 const MyUtils = require('./Helpers/Base/MyUtils.js');
 const MySqlDb = require('./Helpers/MysqlDb.js');
-
 const axios = require('axios');
-const faceDetectServiceUrl = "http://localhost:5000/api/operations";
-const username = 'mehfatitem';
-  
-const faceFolderPath = `C:/Users/${username}/Downloads/yuzler/`;
-const descFilePath = `C:/Users/${username}/Downloads/yuzler_description/`;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -28,7 +23,6 @@ const io = require('socket.io')(server, {
 const faceRecognition = new FaceRecognition();
 const fileHandler = new FileHandler();
 const mysqlDb = new MySqlDb();
-//const mssql = new MSSQL();
 
 const port = 3000;
 
@@ -110,13 +104,12 @@ app.get('/isDetectFace', async (req, res) => {
 
 app.get('/matchFace', async (req, res) => {
   const imgPath = req.query.imgFilePath;
-  const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler';
+  const folderPath = c.faceFolderPath;
   let result = [];
   const imageFiles = fs.readdirSync(folderPath);
 
   for (const imageFile of imageFiles) {
     const imageFilePath = path.join(folderPath, imageFile);
-    console.dir(imageFilePath);
     const similarityResult = await faceRecognition.compareImages(imgPath, imageFilePath);
     result.push(similarityResult);
   }
@@ -135,7 +128,6 @@ app.get('/matchFace', async (req, res) => {
 
 app.get('/matchFaceDesc', async (req, res) => {
   const imgPath = req.query.imgFilePath;
-  const folderPath = 'C:/Users/mehfatitem/Downloads/yuzler_description';
   const result = await faceRecognition.findMatchingDescriptionDb(imgPath);
 
   let resultNew = result.filter(item => item.matched);
@@ -174,7 +166,7 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
       operationTime : operationTime
     };
 
-    const response = await axios.post(faceDetectServiceUrl, operation);
+    const response = await axios.post(c.faceDetectServiceUrl, operation);
 
     if (response.status === 201) {
       // Operation created successfully

@@ -1,9 +1,6 @@
+const c = require('./../../Consts/const.js');
 const faceapi = require('face-api.js');
 const canvas = require('canvas');
-
-const username = 'mehfatitem';
-const faceFolderPath = `C:/Users/${username}/Downloads/yuzler`;
-const distanceThreshold = 0.48; // Define a threshold value to determine if the faces are a match
 
 const {
   Canvas,
@@ -131,7 +128,7 @@ class FaceRecognition {
           for (const item in results) {
             const description = results[item]['description'];
             const contact = results[item]['contact'];
-            const imgPath = path.join(faceFolderPath, `${contact}.png`);
+            const imgPath = path.join(c.faceFolderPath, `${contact}.png`);
 
             const desc = Object.values(JSON.parse(description));
 
@@ -140,7 +137,7 @@ class FaceRecognition {
 
             console.dir(similarityScore);
 
-            if (similarityScore > distanceThreshold) {
+            if (similarityScore > c.distanceThreshold) {
               const similarityPercentage = Math.round(similarityScore * 100);
               const matchedImg = 'data:image/png;base64,' + await fileHandler.imageToBase64(imgPath);
               result.push({
