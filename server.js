@@ -183,7 +183,7 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
 }
 
 function modelImagesDb() {
-  faceRecognition.processImagesInFolderToDB(faceFolderPath)
+  faceRecognition.processImagesInFolderToDB(c.faceFolderPath)
       .then(() => {
         // Detect faces in the specified image
   })
@@ -193,7 +193,7 @@ function modelImagesDb() {
 }
 
 function modelImagesFolder() {
-  faceRecognition.processImagesInFolder(faceFolderPath , descFilePath)
+  faceRecognition.processImagesInFolder(c.faceFolderPath , descFilePath)
       .then(() => {
         // Detect faces in the specified image
   })
