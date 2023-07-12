@@ -5,6 +5,18 @@ let server = is.server;
 let port = is.port;
 let path = is.path;
 
+function createOperationForMysql(baseImage , detectedImage , operationTime) {
+  is.mysqlDb.runQuery(`Insert into detectoperation (baseImage , detectedImage , operationTime) values('data:image/png;base64,${baseImage}' , '${detectedImage}' , ${operationTime} )`, (err, results) => {
+    if (err) {
+      console.log('Error executing query:', err);
+      res.status(500).send('Error occurred inserting detected face');
+      return;
+    } else {
+      console.log("Resim Eklendi Mysql");
+    }
+  });
+}
+
 async function createOperationForMssql(baseImage , detectedImage , operationTime) {
 
   try {
@@ -14,7 +26,7 @@ async function createOperationForMssql(baseImage , detectedImage , operationTime
       operationTime : operationTime
     };
 
-    const response = await axios.post(c.faceDetectServiceUrl, operation);
+    const response = await is.axios.post(c.faceDetectServiceUrl, operation);
 
     if (response.status === 201) {
       // Operation created successfully
@@ -96,7 +108,7 @@ function init (app) {
 	      res.send("No result data");
 	      return;
 	   }
-	   content = MyUtils.createHTMLTable(results , "face-detect-table");
+	   content = is.MyUtils.createHTMLTable(results , "face-detect-table");
 	   res.send(content);
 	 });
 	});
@@ -107,7 +119,7 @@ function init (app) {
 	  // Load the face recognition model
 	  is.faceRecognition.detectFaces(imgPath)
 	    .then(detections => {
-	      let baseImage = fileHandler.imageToBase64(imgPath);
+	      let baseImage = is.fileHandler.imageToBase64(imgPath);
 	      baseImage = `${baseImage}`;
 	      let detectedImage = detections;
 	      res.send(detections);
