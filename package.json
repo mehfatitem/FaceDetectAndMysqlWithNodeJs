@@ -28,5 +28,8 @@
     "pi-camera-connect": "^0.3.4",
     "socket.io": "^4.6.2",
     "tedious": "^16.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.48.0"
   }
 }
